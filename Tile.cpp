@@ -52,67 +52,42 @@ void Tile::renderEmpty()
     SDL_RenderPresent(renderer);
 }
 
-void Tile::swapTile(Tile otherTile, SDL_Texture* moveText, int speed)
+void Tile::swapTile(Tile otherTile, SDL_Texture* MoveText, int speed)
 {
     SDL_Rect thisRect = tileRect;
     SDL_Rect otherRect = otherTile.tileRect;
-    while(otherRect.x != tileRect.x)
+    while(otherRect.y != tileRect.y)
     {
-        if(moveText != NULL)
+        if (otherTile.tileRect.y > tileRect.y)
         {
-            otherRect.x += 7;
-            otherRect.x = min(otherRect.x, tileRect.x);
-        }
-        else if(otherTile.tileRect.x > tileRect.x)
-        {
-            otherRect.x -= 7;
-            tileRect.x += 7;
+            otherRect.y -= 9;
+            thisRect.y += 9;
         }
         else
         {
-            otherRect.x += 7;
-            tileRect.x -= 7;
+            otherRect.y += 9;
+            thisRect.y -= 9;
         }
-        if (moveText == NULL)
-        {
-            SDL_RenderCopy(renderer, texture, NULL, &thisRect);
-            SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
-        }
-        else
-        {
-            SDL_RenderCopy(renderer, moveText, NULL, &otherRect);
-        }
+        SDL_RenderCopy(renderer, texture, NULL, &thisRect);
+        SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
         SDL_RenderPresent(renderer);
         otherTile.renderEmpty();
         renderEmpty();
     }
-
-    while (otherRect.y != tileRect.y)
+    while(otherRect.x != tileRect.x)
     {
-        if(moveText != NULL)
+        if (otherTile.tileRect.x > tileRect.x)
         {
-            otherRect.y += 7;
-            otherRect.y = min(otherRect.y, tileRect.y);
-        }
-        else if( otherTile.tileRect.y > tileRect.y)
-        {
-            otherRect.y -= 7;
-            thisRect.y += 7;
+            otherRect.x -= 9;
+            thisRect.x += 9;
         }
         else
         {
-            otherRect.y += 7;
-            thisRect.y -= 7;
+            otherRect.x += 9;
+            thisRect.x -= 9;
         }
-        if (moveText == NULL)
-        {
-            SDL_RenderCopy(renderer, texture, NULL, &thisRect);
-            SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
-        }
-        else
-        {
-            SDL_RenderCopy(renderer, moveText, NULL, &otherRect);
-        }
+        SDL_RenderCopy(renderer, texture, NULL, &thisRect);
+        SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
         SDL_RenderPresent(renderer);
         otherTile.renderEmpty();
         renderEmpty();
