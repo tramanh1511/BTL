@@ -60,13 +60,13 @@ void Tile::swapTile(Tile otherTile, SDL_Texture* MoveText, int speed)
     {
         if (otherTile.tileRect.y > tileRect.y)
         {
-            otherRect.y -= 9;
-            thisRect.y += 9;
+            otherRect.y -= 7;
+            thisRect.y += 7;
         }
         else
         {
-            otherRect.y += 9;
-            thisRect.y -= 9;
+            otherRect.y += 7;
+            thisRect.y -= 7;
         }
         SDL_RenderCopy(renderer, texture, NULL, &thisRect);
         SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
@@ -78,13 +78,13 @@ void Tile::swapTile(Tile otherTile, SDL_Texture* MoveText, int speed)
     {
         if (otherTile.tileRect.x > tileRect.x)
         {
-            otherRect.x -= 9;
-            thisRect.x += 9;
+            otherRect.x -= 7;
+            thisRect.x += 7;
         }
         else
         {
-            otherRect.x += 9;
-            thisRect.x -= 9;
+            otherRect.x += 7;
+            thisRect.x -= 7;
         }
         SDL_RenderCopy(renderer, texture, NULL, &thisRect);
         SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
@@ -92,4 +92,5 @@ void Tile::swapTile(Tile otherTile, SDL_Texture* MoveText, int speed)
         otherTile.renderEmpty();
         renderEmpty();
     }
+
 }

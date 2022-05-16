@@ -10,7 +10,11 @@ void gameBoard::renderBoard()
 {
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
+        {
+            tileBoard[i][j].renderer = renderer;
             tileBoard[i][j].render();
+        }
+
 }
 
 void gameBoard::fillBoard()
@@ -50,64 +54,73 @@ void gameBoard::fillBoard()
 bool gameBoard::findMatch(int& countPoint)
 {
     speed = 25;
-    for(int i = 0; i < boardRow; i++)
+    for (int i = 0; i < boardRow; i++)
     {
-        int temp(1);
+        int k = 1;
         for (int j = 0; j < boardCol - 2;)
         {
-            if(temp < boardCol && tileBoard[i][j].type == tileBoard[i][temp].type)
+            if ( k < boardCol && tileBoard[i][j].type == tileBoard[i][k].type)
             {
-                temp++;
+                k++;
                 continue;
             }
-            if(temp - j >= 3)
+            if (k - j >= 3)
             {
-                if(temp - j > 3) speed = 60;
-                countPoint += (temp - j) * 100;
-                for(int k = j; k < temp; k++)
+                countPoint += (k - j) * 100;
+                for (int temp = j; temp < k; temp++)
                 {
-                    tileBoard[i][k].tile_status = tileStatus::Empty;
-                    tileBoard[i][k].renderEmpty();
+                    tileBoard[i][temp].tile_status = tileStatus::Empty;
+                    if (!Mix_Paused(-1))
+                    {
+                        Mix_Pause(1);
+                        Mix_PlayChannel(1, eatableSound, 0);
+                    }
+                    tileBoard[i][temp].renderEmpty();
                 }
                 SDL_RenderPresent(renderer);
             }
-            j = temp;
+            j = k;
         }
     }
-
-    for(int j = 0; j < boardCol; j++)
+    for (int j = 0; j < boardCol; j++)
     {
-        int temp(1);
-        for(int i = 0; i < boardRow - 2;)
+        int k = 1;
+        for (int i = 0; i < boardRow - 2;)
         {
-            if(temp < boardRow && tileBoard[i][j].type == tileBoard[temp][j].type)
+            if ( k < boardRow && tileBoard[i][j].type == tileBoard[k][j].type)
             {
-                temp++;
+                k++;
                 continue;
             }
-            if(temp - i >=3)
+            if (k - i >= 3)
             {
-                if(temp - i > 3) speed = 60;
-                countPoint += (temp - i) * 100;
-                for(int k=i; k < temp; k++)
+                countPoint += (k - i) * 100;
+                for (int temp = i; temp < k; temp++)
                 {
-                    tileBoard[k][j].type = tileStatus::Empty;
-                    tileBoard[k][j].renderEmpty();
+                    tileBoard[temp][j].tile_status = tileStatus::Empty;
+                    if (!Mix_Paused(-1))
+                    {
+                        Mix_Pause(1);
+                        Mix_PlayChannel(1, eatableSound, 0);
+                    }
+                    tileBoard[temp][j].renderEmpty();
                 }
                 SDL_RenderPresent(renderer);
             }
-            i = temp;
+            i = k;
         }
     }
-
-    for(int i=0; i < boardRow; i++)
-        for(int j=0; j < boardCol; j++)
-            if(tileBoard[i][j].type == tileStatus::Empty) return true;
+    for (int i = 0; i < boardRow; i++)
+        for (int j = 0; j < boardCol; j++)
+            if (tileBoard[i][j].tile_status == tileStatus::Empty)
+                return true;
     return false;
+
 }
 
 bool gameBoard::findTileSelected(int xmouse, int ymouse, int& Move)
 {
+    if (!Mix_Paused(-1)) Mix_PlayChannel(-1, selectedSound, 0);
     static int countSelect = 0;
     static int tempR = 0, tempC = 0;
     for(int i = 0; i < boardRow; i++)
@@ -170,11 +183,13 @@ bool gameBoard::checkPossibleMove()
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
             tempBoard.tileBoard[i][j].type = tileBoard[i][j].type;
+    cerr << 1;
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol - 1; j++)
         {
             swap(tempBoard.tileBoard[i][j].type, tempBoard.tileBoard[i][j+1].type);
-            if(tempBoard.findMatch(hiddenPoint)) return true;
+            if(tempBoard.findMatch(hiddenPoint))
+                return true;
             swap(tempBoard.tileBoard[i][j].type, tempBoard.tileBoard[i][j+1].type);
         }
     for(int i = 0; i < boardCol - 1; i++)
@@ -189,57 +204,16 @@ bool gameBoard::checkPossibleMove()
 
 void gameBoard::dropTile(int& Point)
 {
-    for(int j = 0; j < boardCol; j++)
-    {
-        static int k = 0;
-        for(int i = boardRow - 1; i >= 0; i--)
+    for(int i = 0; i < boardRow; i++)
+        for(int j = 0; j < boardCol; j++)
         {
             if(tileBoard[i][j].tile_status == tileStatus::Empty)
             {
-                for(int k = i - 1; k >= 0; k--)
-                {
-                    if(tileBoard[k][j].tile_status != tileStatus::Empty)
-                    {
-                        tileBoard[i][j].type = tileBoard[k][j].type;
-                        tileBoard[k][j].tile_status = tileStatus::Empty;
-                        if(speed != 60)
-                        {
-                            if(i - k >= 3) speed = 50;
-                            else speed = 25;
-                        }
-                        for(int temp = k; temp < i;)
-                            tileBoard[temp][j].swapTile(tileBoard[temp++][j], tileBoard[k][j].texture, speed);
-                        tileBoard[i][j].render();
-                        break;
-                    }
-                    else continue;
-                }
+                SDL_Delay(100);
+                tileBoard[i][j].type = 1 + rand() % (numOfTile-1);
+                tileBoard[i][j].render();
             }
         }
-        for(int i = boardRow - 1; i >= 0; i--)
-        {
-            if (tileBoard[i][j].tile_status == tileStatus::Empty)
-            {
-                for(k = i; k >= 0; k--)
-                {
-                    tileBoard[0][j].type = rand() % numOfTile + 1;
-                    tileBoard[0][j].render();
-                    if(k == 0) break;
-                    tileBoard[k][j].type = tileBoard[0][j].type;
-                    tileBoard[0][j].tile_status = tileStatus::Empty;
-                    tileBoard[0][j].renderEmpty();
-                    if(speed != 65)
-                    {
-                        if(i - k >= 3) speed = 50;
-                        else speed = 25;
-                    }
-                    for(int temp = 0; temp < k;)
-                        tileBoard[temp][j].swapTile(tileBoard[temp++][j], tileBoard[0][j].texture, speed);
-                    tileBoard[k][j].render();
-                }
-            }
-        }
-    }
 }
 
 void gameBoard::mixTile()

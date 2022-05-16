@@ -8,11 +8,20 @@
 
 using namespace std;
 
+SDL_Rect TargetScore = {50, 125, 120, 50};
+SDL_Rect yourScore = {45, 310, 120, 50};
+SDL_Rect MoveRect = { 70, 440, 60, 50};
+
 void Game::initializeGame()
 {
+    if (!loadMusic()) cerr << "Failed to load music!\n";
+    Mix_VolumeChunk(eatableSound, 32);
+    Mix_VolumeChunk(selectedSound, 36);
+    Mix_VolumeMusic(16);
     SDL_Texture* image = loadTexture("image/background.png", renderer);
     SDL_RenderCopy(renderer, image, NULL, NULL);
     SDL_RenderPresent(renderer);
+    Mix_PlayMusic(backgroundMusic, -1);
     targetPoint = 10000;
     Move = 15;
     bool quit = true;
@@ -35,10 +44,14 @@ void Game::initializeGame()
 
 int Game::gamePlay()
 {
-    int playerMove = Move;
+    int yourMove = Move;
     int Point = 0;
     gameBoard game_board(renderer);
+    loadFont("00000", renderer, yourScore);
+    loadFont("10000", renderer, TargetScore);
+    loadFont("20", renderer, MoveRect);
     game_board.fillBoard();
+
     bool isRunning = false;
     while (!isRunning)
     {
@@ -47,20 +60,32 @@ int Game::gamePlay()
         {
             while(!game_board.checkPossibleMove())
             {
-                //SDL_Delay(100);
+                SDL_SetRenderDrawColor(renderer, 140, 70, 0, 0);
+                SDL_RenderFillRect(renderer, &yourScore);
+                loadFont("No Possible move!", renderer, yourScore);
+                SDL_Delay(100);
+                SDL_RenderFillRect(renderer, &yourScore);
+                loadFont("Mix Tiles!", renderer, yourScore);
                 game_board.mixTile();
                 game_board.renderBoard();
             }
-            game_board.findTileSelected(e.button.x, e.button.y, playerMove);
+
+            game_board.findTileSelected(e.button.x, e.button.y, yourMove);
             while(game_board.findMatch(Point))
             {
+                SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
+                SDL_RenderFillRect(renderer, &MoveRect);
+                string tempMove = to_string(yourMove);
+                const char* playerMove = tempMove.c_str();
+                loadFont(playerMove, renderer, MoveRect);
                 game_board.dropTile(Point);
             }
             if(point >= targetPoint)
             {
 
+
             }
-            else if(playerMove == 0)
+            else if(yourMove == 0)
             {
 
             }
