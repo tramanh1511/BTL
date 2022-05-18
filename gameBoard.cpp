@@ -1,10 +1,13 @@
 #include <bits/stdc++.h>
 #include <SDL_mixer.h>
 #include "SDL_mixer_basic.h"
+#include "SDL_ttf_basic.h"
 #include "SDL_utils.h"
 #include "gameBoard.h"
 
 using namespace std;
+
+SDL_Rect YourScore = {45, 310, 120, 50};
 
 void gameBoard::renderBoard()
 {
@@ -53,7 +56,6 @@ void gameBoard::fillBoard()
 
 bool gameBoard::findMatch(int& countPoint)
 {
-    speed = 25;
     for (int i = 0; i < boardRow; i++)
     {
         int k = 1;
@@ -66,9 +68,16 @@ bool gameBoard::findMatch(int& countPoint)
             }
             if (k - j >= 3)
             {
+                SDL_Delay(100);
                 countPoint += (k - j) * 100;
+                string point = to_string(countPoint);
+                const char* pointt = point.c_str();
+                SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
+                SDL_RenderFillRect(renderer, &YourScore);
+                loadFont(pointt, renderer, YourScore);
                 for (int temp = j; temp < k; temp++)
                 {
+                    SDL_Delay(10);
                     tileBoard[i][temp].tile_status = tileStatus::Empty;
                     if (!Mix_Paused(-1))
                     {
@@ -94,9 +103,16 @@ bool gameBoard::findMatch(int& countPoint)
             }
             if (k - i >= 3)
             {
+                SDL_Delay(100);
                 countPoint += (k - i) * 100;
+                string point = to_string(countPoint);
+                const char* pointt = point.c_str();
+                SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
+                SDL_RenderFillRect(renderer, &YourScore);
+                loadFont(pointt, renderer, YourScore);
                 for (int temp = i; temp < k; temp++)
                 {
+                    SDL_Delay(10);
                     tileBoard[temp][j].tile_status = tileStatus::Empty;
                     if (!Mix_Paused(-1))
                     {
@@ -118,7 +134,7 @@ bool gameBoard::findMatch(int& countPoint)
 
 }
 
-bool gameBoard::findTileSelected(int xmouse, int ymouse, int& Move)
+bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
 {
     if (!Mix_Paused(-1)) Mix_PlayChannel(-1, selectedSound, 0);
     static int countSelect = 0;
@@ -153,6 +169,7 @@ bool gameBoard::findTileSelected(int xmouse, int ymouse, int& Move)
                             if(!findMatch(hiddenPoint))
                             {
                                 swap(tileBoard[i][j].type, tileBoard[tempR][tempC].type);
+                                if (!Mix_Paused(-1)) Mix_PlayChannel(1, reverseSound, 0);
                                 tileBoard[tempR][tempC].swapTile(tileBoard[i][j]);
                             }
                             tileBoard[i][j].render();
@@ -160,7 +177,9 @@ bool gameBoard::findTileSelected(int xmouse, int ymouse, int& Move)
                         }
                         else
                         {
+                            tileBoard[i][j].renderEmpty();
                             tileBoard[i][j].render();
+                            tileBoard[tempR][tempC].renderEmpty();
                             tileBoard[tempR][tempC].render();
                         }
                         countSelect = 0;
@@ -169,6 +188,7 @@ bool gameBoard::findTileSelected(int xmouse, int ymouse, int& Move)
                 }
                 else if (tileBoard[i][j].tile_status == tileStatus::Selected)
                 {
+                    tileBoard[i][j].renderEmpty();
                     tileBoard[i][j].render();
                     countSelect--;
                 }
@@ -183,7 +203,6 @@ bool gameBoard::checkPossibleMove()
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
             tempBoard.tileBoard[i][j].type = tileBoard[i][j].type;
-    cerr << 1;
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol - 1; j++)
         {
@@ -220,11 +239,11 @@ void gameBoard::mixTile()
 {
     int tempBoard[boardRow][boardCol];
     bool checkFill[boardRow][boardCol] = {0};
-    for(int i = 0; i<boardRow; i++)
-        for(int j=0; j<boardCol; j++)
+    for(int i = 0; i < boardRow; i++)
+        for(int j = 0; j < boardCol; j++)
             tempBoard[i][j] = tileBoard[i][j].type;
-    for(int i=0; i<boardRow; i++)
-        for(int j=0; j<boardCol; j++)
+    for(int i = 0; i < boardRow; i++)
+        for(int j = 0; j < boardCol; j++)
         {
             int m = rand() % boardRow;
             int n = rand() % boardCol;
@@ -232,7 +251,7 @@ void gameBoard::mixTile()
             tileBoard[m][n].type = tempBoard[i][j];
             checkFill[m][n] = 0;
         }
-    if(!checkPossibleMove()) mixTile();
+    while(!checkPossibleMove()) mixTile();
 }
 
 

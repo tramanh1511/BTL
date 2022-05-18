@@ -15,6 +15,7 @@ public:
     Game(SDL_Renderer* _renderer, SDL_Event _e) : renderer(_renderer), e(_e) {};
     void initializeGame();
     int gamePlay();
+    int gameResult(int res);
 };
 
 

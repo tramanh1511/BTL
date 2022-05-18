@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
 {
     SDL_Window* window;
     SDL_Renderer* renderer;
+    srand(int(time(NULL)));
     initSDL(window, renderer, SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
 
     // Your drawing code here
@@ -25,15 +26,22 @@ int main(int argc, char* argv[])
     bool isRunning = false;
     while(!isRunning)
     {
+        if (SDL_PollEvent(&e) == 0) continue;
+        if (e.type == SDL_QUIT) break;
+        if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) break;
         Game game(renderer, e);
         game.initializeGame();
         while(!isRunning)
         {
-            int temp = game.gamePlay();
-            if (temp == -1) isRunning = true;
-            else if (temp == 1) break;
-            else continue;
+            int res = game.gamePlay();
+            if(res == 0 || res == 1)
+            {
+                //isRunning = true;
+                SDL_Delay(100);
+                continue;
+            }
         }
+        //  if(isRunning == true) isRunning = false;
     }
     closeMusic();
     waitUntilKeyPressed();

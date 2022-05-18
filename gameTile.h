@@ -1,5 +1,5 @@
-#ifndef TILE_H
-#define TILE_H
+#ifndef GAMETILE_H
+#define GAMETILE_H
 #include <bits/stdc++.h>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -37,4 +37,4 @@ public:
     void swapTile(Tile otherTile, SDL_Texture* moveText = NULL, int speed = 20 );
 };
 
-#endif // TILE_H
+#endif // GAMETILE_H

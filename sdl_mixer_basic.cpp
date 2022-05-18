@@ -8,6 +8,9 @@ using namespace std;
 Mix_Music *backgroundMusic = NULL;
 Mix_Chunk *selectedSound = NULL;
 Mix_Chunk *eatableSound = NULL;
+Mix_Chunk *reverseSound = NULL;
+Mix_Music *winMusic = NULL;
+Mix_Music *gameOverMusic = NULL;
 
 bool loadMusic()
 {
@@ -30,6 +33,12 @@ bool loadMusic()
         cerr << "Failed to load the sound effect! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
     }
+    reverseSound = Mix_LoadWAV("sound/reverseSound.wav");
+    if (reverseSound == NULL)
+    {
+        cerr << "Failed to load the sound effect! SDL_mixer Error: " << Mix_GetError() << "\n";
+        success = false;
+    }
     eatableSound = Mix_LoadWAV("sound/eatableSound.mp3");
     if (selectedSound == NULL)
     {
@@ -43,6 +52,21 @@ bool loadMusic()
          cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
     }
+    winMusic = Mix_LoadMUS("sound/winMusic.mp3");
+    if (winMusic == NULL)
+    {
+         cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
+        success = false;
+    }
+    gameOverMusic = Mix_LoadMUS("sound/gamOverMusic.mp3");
+    if (gameOverMusic == NULL)
+    {
+         cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
+        success = false;
+    }
+
+
+
     return success;
 }
 
@@ -51,7 +75,9 @@ void closeMusic()
     //Free the sound effects
     Mix_FreeChunk(eatableSound);
     Mix_FreeChunk(selectedSound);
+    Mix_FreeChunk(reverseSound);
     eatableSound = NULL;
+    reverseSound = NULL;
     selectedSound = NULL;
     //Free the music
     Mix_FreeMusic(backgroundMusic);
