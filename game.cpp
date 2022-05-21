@@ -15,25 +15,22 @@ SDL_Rect soundRect = {730, 10, 50, 50};
 SDL_Rect playbutton = {280, 400, 180, 60};
 SDL_Rect title = {400, 300, 300, 250};
 
-void Game::initializeGame()
+void Game::gameInitialize()
 {
     if (!loadMusic()) cerr << "Failed to load music!\n";
-    Mix_VolumeChunk(eatableSound, 25);
-    Mix_VolumeChunk(selectedSound, 25);
-    Mix_VolumeMusic(10);
+    Mix_VolumeChunk(eatableSound, 15);
+    Mix_VolumeChunk(selectedSound, 20);
+    Mix_VolumeMusic(80);
     SDL_Texture* image = loadTexture("image/background.png", renderer);
     SDL_RenderCopy(renderer, image, NULL, NULL);
     SDL_RenderPresent(renderer);
     Mix_PlayMusic(backgroundMusic, -1);
-    targetPoint = 10000;
-    Move = 20;
-    bool quit = true;
-    while (quit)
+    bool isRunning = true;
+    while (isRunning)
     {
         if (SDL_PollEvent(&e) == 0) continue;
         if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
         {
-            cout << e.button.x << " " << e.button.y << "\n";
             if((e.button.x <= 780) && (e.button.x >= 730) && (e.button.y <= 60) && (e.button.y >= 15))
             {
                 Mix_PlayChannel(-1, selectedSound, 0);
@@ -51,41 +48,49 @@ void Game::initializeGame()
                 SDL_RenderCopy(renderer, Sound, NULL, &soundRect);
                 SDL_RenderPresent(renderer);
                 SDL_Delay(50);
-                quit = true;
             }
             else if((e.button.x <= 510) && (e.button.x >= 320) && (e.button.y <= 460) && (e.button.y >= 380))
             {
                 Mix_PlayChannel(-1, selectedSound, 0);
-                SDL_Texture* select = loadTexture("image/selectLevel.png", renderer);
-                SDL_RenderCopy(renderer, select, NULL, NULL);
-                SDL_RenderPresent(renderer);
-                SDL_Delay(500);
+                SDL_Delay(100);
+                isRunning = false;
             }
-            else if((e.button.x <= 472) && (e.button.x >= 321))
+        }
+    }
+}
+
+void Game::gameLevel()
+{
+    bool isRunning = true;
+    SDL_Texture* select = loadTexture("image/selectLevel.png", renderer);
+    SDL_RenderCopy(renderer, select, NULL, NULL);
+    SDL_RenderPresent(renderer);
+
+    targetPoint = 10000;
+    while (isRunning)
+    {
+        if (SDL_PollEvent(&e) == 0) continue;
+        if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
+        {
+            if((e.button.x <= 490) && (e.button.x >= 310))
             {
-                cout << e.button.x << " " << e.button.y << "\n";
                 Mix_PlayChannel(-1, selectedSound, 0);
                 if(e.button.y <= 400 && e.button.y >= 350)
                 {
-                    cout << "W\n";
-
+                    Move = 20;
+                    isRunning = false;
                 }
-                else if(e.button.y <= 475 && e.button.y >= 430)
+                else if(e.button.y <= 475 && e.button.y >= 420)
                 {
-                    cout << "E\n";
-
+                    Move = 15;
+                    isRunning = false;
                 }
                 else if(e.button.y <= 560 && e.button.y >= 507)
                 {
-                    cout << "Q\n";
-
+                    Move = 10;
+                    isRunning = false;
                 }
-                SDL_Texture* image = loadTexture("image/gameboard.png", renderer);
-                SDL_RenderCopy(renderer, image, NULL, NULL);
-                SDL_RenderPresent(renderer);
-                quit = false;
             }
-
         }
     }
 }
@@ -94,12 +99,16 @@ int Game::gamePlay()
 {
     int yourMove = Move;
     int Point = 0;
+    SDL_Texture* image = loadTexture("image/gameboard.png", renderer);
+    SDL_RenderCopy(renderer, image, NULL, NULL);
+    SDL_RenderPresent(renderer);
     gameBoard game_board(renderer);
     loadFont("00000", renderer, yourScore);
     loadFont("10000", renderer, TargetScore);
-    loadFont("20", renderer, MoveRect);
+    string moveString = to_string(Move);
+    const char* Movee = moveString.c_str();
+    loadFont(Movee, renderer, MoveRect);
     game_board.fillBoard();
-
     bool isRunning = false;
     while (!isRunning)
     {
@@ -135,7 +144,7 @@ int Game::gamePlay()
     }
 }
 
-int Game::gameResult(int res)
+Game::gameResult(int res)
 {
     if(res == 1)
     {
@@ -154,3 +163,32 @@ int Game::gameResult(int res)
         return 0;
     }
 }
+
+bool Game::gamePlayAgain()
+{
+    bool isRunning = true;
+    while (isRunning)
+    {
+        if (SDL_PollEvent(&e) == 0) continue;
+        if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
+        {
+            if(e.button.x <= 485 && e.button.x >= 310)
+            {
+                Mix_PlayChannel(-1, selectedSound, 0);
+                if(e.button.y <= 400 && e.button.y >= 320)
+                {
+                    isRunning = false;
+                    return 1;
+
+                }
+                else if(e.button.y <= 500 && e.button.y >= 395)
+                {
+                    isRunning = false;
+                    return 0;
+                }
+            }
+
+        }
+    }
+}
+

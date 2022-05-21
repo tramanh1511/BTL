@@ -15,7 +15,8 @@ enum tileStatus
     Green,
     Orange,
     Red,
-    Yellow
+    Yellow,
+    Purple
 };
 
 class Tile
@@ -34,7 +35,7 @@ public:
     void render();
     void renderSelected();
     void renderEmpty();
-    void swapTile(Tile otherTile, SDL_Texture* moveText = NULL, int speed = 20 );
+    void swapTile(Tile otherTile);
 };
 
 #endif // GAMETILE_H

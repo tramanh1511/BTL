@@ -13,9 +13,11 @@ private:
     int point = 0, targetPoint = 0, Move = 0;
 public:
     Game(SDL_Renderer* _renderer, SDL_Event _e) : renderer(_renderer), e(_e) {};
-    void initializeGame();
+    void gameInitialize();
+    void gameLevel();
     int gamePlay();
     int gameResult(int res);
+    bool gamePlayAgain();
 };
 
 

@@ -26,22 +26,20 @@ int main(int argc, char* argv[])
     bool isRunning = false;
     while(!isRunning)
     {
+        bool gameOver = false;
         if (SDL_PollEvent(&e) == 0) continue;
         if (e.type == SDL_QUIT) break;
         if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) break;
         Game game(renderer, e);
-        game.initializeGame();
-        while(!isRunning)
+        game.gameInitialize();
+        game.gameLevel();
+        while(!gameOver)
         {
             int res = game.gamePlay();
-            if(res == 0 || res == 1)
-            {
-                //isRunning = true;
-                SDL_Delay(100);
-                continue;
-            }
+            if(res == 0 || res == 1) gameOver = true;
         }
-        //  if(isRunning == true) isRunning = false;
+        int status = game.gamePlayAgain();
+        if(!status) isRunning = true;
     }
     closeMusic();
     waitUntilKeyPressed();

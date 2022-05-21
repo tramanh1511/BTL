@@ -17,10 +17,10 @@ bool loadMusic()
     bool success = true;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-	{
-		cerr << "SDL could not initialize! SDL Error: %s\n" << SDL_GetError();
-		success = false;
-	}
+    {
+        cerr << "SDL could not initialize! SDL Error: %s\n" << SDL_GetError();
+        success = false;
+    }
     //Init SDL_mixer
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
     {
@@ -33,8 +33,8 @@ bool loadMusic()
         cerr << "Failed to load the sound effect! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
     }
-    reverseSound = Mix_LoadWAV("sound/reverseSound.wav");
-    if (reverseSound == NULL)
+    reverseSound = Mix_LoadWAV("sound/reverseSound.mp3");
+    if (selectedSound == NULL)
     {
         cerr << "Failed to load the sound effect! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
@@ -46,22 +46,22 @@ bool loadMusic()
         success = false;
     }
     //Load Music
-    backgroundMusic = Mix_LoadMUS("sound/backgroundMusic.wav");
+    backgroundMusic = Mix_LoadMUS("sound/backgroundMusic.mp3");
     if (backgroundMusic == NULL)
     {
-         cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
+        cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
     }
     winMusic = Mix_LoadMUS("sound/winMusic.mp3");
     if (winMusic == NULL)
     {
-         cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
+        cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
     }
     gameOverMusic = Mix_LoadMUS("sound/gamOverMusic.mp3");
     if (gameOverMusic == NULL)
     {
-         cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
+        cerr << "Failed to load the background music! SDL_mixer Error: " << Mix_GetError() << "\n";
         success = false;
     }
 
@@ -76,6 +76,7 @@ void closeMusic()
     Mix_FreeChunk(eatableSound);
     Mix_FreeChunk(selectedSound);
     Mix_FreeChunk(reverseSound);
+
     eatableSound = NULL;
     reverseSound = NULL;
     selectedSound = NULL;

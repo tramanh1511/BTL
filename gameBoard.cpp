@@ -68,25 +68,25 @@ bool gameBoard::findMatch(int& countPoint)
             }
             if (k - j >= 3)
             {
-                SDL_Delay(100);
+                if (!Mix_Paused(-1))
+                    {
+                        Mix_Pause(1);
+                        Mix_PlayChannel(1, eatableSound, 0);
+                    }
+                for (int temp = j; temp < k; temp++)
+                {
+                    tileBoard[i][temp].tile_status = tileStatus::Empty;
+                    SDL_Delay(30);
+                    tileBoard[i][temp].renderEmpty();
+                }
                 countPoint += (k - j) * 100;
                 string point = to_string(countPoint);
                 const char* pointt = point.c_str();
                 SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
                 SDL_RenderFillRect(renderer, &YourScore);
                 loadFont(pointt, renderer, YourScore);
-                for (int temp = j; temp < k; temp++)
-                {
-                    SDL_Delay(10);
-                    tileBoard[i][temp].tile_status = tileStatus::Empty;
-                    if (!Mix_Paused(-1))
-                    {
-                        Mix_Pause(1);
-                        Mix_PlayChannel(1, eatableSound, 0);
-                    }
-                    tileBoard[i][temp].renderEmpty();
-                }
-                SDL_RenderPresent(renderer);
+
+                //  SDL_RenderPresent(renderer);
             }
             j = k;
         }
@@ -103,25 +103,25 @@ bool gameBoard::findMatch(int& countPoint)
             }
             if (k - i >= 3)
             {
-                SDL_Delay(100);
+                if (!Mix_Paused(-1))
+                    {
+                        Mix_Pause(1);
+                        Mix_PlayChannel(1, eatableSound, 0);
+                    }
+                for (int temp = i; temp < k; temp++)
+                {
+                    tileBoard[temp][j].tile_status = tileStatus::Empty;
+                    SDL_Delay(30);
+                    tileBoard[temp][j].renderEmpty();
+                }
                 countPoint += (k - i) * 100;
                 string point = to_string(countPoint);
                 const char* pointt = point.c_str();
                 SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
                 SDL_RenderFillRect(renderer, &YourScore);
                 loadFont(pointt, renderer, YourScore);
-                for (int temp = i; temp < k; temp++)
-                {
-                    SDL_Delay(10);
-                    tileBoard[temp][j].tile_status = tileStatus::Empty;
-                    if (!Mix_Paused(-1))
-                    {
-                        Mix_Pause(1);
-                        Mix_PlayChannel(1, eatableSound, 0);
-                    }
-                    tileBoard[temp][j].renderEmpty();
-                }
-                SDL_RenderPresent(renderer);
+
+                //  SDL_RenderPresent(renderer);
             }
             i = k;
         }
@@ -166,14 +166,16 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
                             tileBoard[i][j].swapTile(tileBoard[tempR][tempC]);
                             tileBoard[i][j].render();
                             tileBoard[tempR][tempC].render();
+                            SDL_Delay(150);
                             if(!findMatch(hiddenPoint))
                             {
                                 swap(tileBoard[i][j].type, tileBoard[tempR][tempC].type);
                                 if (!Mix_Paused(-1)) Mix_PlayChannel(1, reverseSound, 0);
                                 tileBoard[tempR][tempC].swapTile(tileBoard[i][j]);
+                                SDL_Delay(100);
+                                tileBoard[tempR][tempC].render();
+                                tileBoard[i][j].render();
                             }
-                            tileBoard[i][j].render();
-                            tileBoard[tempR][tempC].render();
                         }
                         else
                         {

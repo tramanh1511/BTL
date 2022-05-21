@@ -2,7 +2,7 @@
 #include <SDL.h>
 #include "SDL_image_basic.h"
 #include "SDL_mixer_basic.h"
-#include "Tile.h"
+#include "gameTile.h"
 
 using namespace std;
 
@@ -52,7 +52,7 @@ void Tile::renderEmpty()
     SDL_RenderPresent(renderer);
 }
 
-void Tile::swapTile(Tile otherTile, SDL_Texture* MoveText, int speed)
+void Tile::swapTile(Tile otherTile)
 {
     SDL_Rect thisRect = tileRect;
     SDL_Rect otherRect = otherTile.tileRect;
@@ -60,37 +60,36 @@ void Tile::swapTile(Tile otherTile, SDL_Texture* MoveText, int speed)
     {
         if (otherTile.tileRect.y > tileRect.y)
         {
-            otherRect.y -= 7;
-            thisRect.y += 7;
+            otherRect.y -= 9;
+            thisRect.y += 9;
         }
         else
         {
-            otherRect.y += 7;
-            thisRect.y -= 7;
+            otherRect.y += 9;
+            thisRect.y -= 9;
         }
+        otherTile.renderEmpty();
+        renderEmpty();
         SDL_RenderCopy(renderer, texture, NULL, &thisRect);
         SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
         SDL_RenderPresent(renderer);
-        otherTile.renderEmpty();
-        renderEmpty();
     }
     while(otherRect.x != tileRect.x)
     {
         if (otherTile.tileRect.x > tileRect.x)
         {
-            otherRect.x -= 7;
-            thisRect.x += 7;
+            otherRect.x -= 9;
+            thisRect.x += 9;
         }
         else
         {
-            otherRect.x += 7;
-            thisRect.x -= 7;
+            otherRect.x += 9;
+            thisRect.x -= 9;
         }
+        otherTile.renderEmpty();
+        renderEmpty();
         SDL_RenderCopy(renderer, texture, NULL, &thisRect);
         SDL_RenderCopy(renderer, otherTile.texture, NULL, &otherRect);
         SDL_RenderPresent(renderer);
-        otherTile.renderEmpty();
-        renderEmpty();
     }
-
 }
