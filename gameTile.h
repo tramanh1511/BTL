@@ -16,7 +16,7 @@ enum tileStatus
     Orange,
     Red,
     Yellow,
-    Purple
+    Bomb
 };
 
 class Tile

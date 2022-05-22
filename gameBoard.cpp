@@ -22,12 +22,16 @@ void gameBoard::renderBoard()
 
 void gameBoard::fillBoard()
 {
+    int numOfBomb = rand() % 3;
     for(int i = 0; i < boardRow; i++)
     {
         for (int j = 0; j < boardCol;)
         {
             j = max(0,j);
-            tileBoard[i][j].type = 1 + rand() % (numOfTile-1);
+            int type = 1 + rand() % numOfTile;
+            if(numOfBomb == 0) type = 1 + rand() % (numOfTile-1);
+            tileBoard[i][j].type = type;
+            if(type == 6) numOfBomb --;
             tileBoard[i][j].tileRect.x = 220 + i*63;
             tileBoard[i][j].tileRect.y =  20 + j*63;
             if (j >= 2 && (tileBoard[i][j].type == tileBoard[i][j-1].type)
@@ -45,6 +49,7 @@ void gameBoard::fillBoard()
             j++;
         }
     }
+
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
         {
@@ -68,11 +73,7 @@ bool gameBoard::findMatch(int& countPoint)
             }
             if (k - j >= 3)
             {
-                if (!Mix_Paused(-1))
-                    {
-                        Mix_Pause(1);
-                        Mix_PlayChannel(1, eatableSound, 0);
-                    }
+                Mix_PlayChannel(1, eatableSound, 0);
                 for (int temp = j; temp < k; temp++)
                 {
                     tileBoard[i][temp].tile_status = tileStatus::Empty;
@@ -103,11 +104,7 @@ bool gameBoard::findMatch(int& countPoint)
             }
             if (k - i >= 3)
             {
-                if (!Mix_Paused(-1))
-                    {
-                        Mix_Pause(1);
-                        Mix_PlayChannel(1, eatableSound, 0);
-                    }
+                Mix_PlayChannel(1, eatableSound, 0);
                 for (int temp = i; temp < k; temp++)
                 {
                     tileBoard[temp][j].tile_status = tileStatus::Empty;
@@ -132,6 +129,23 @@ bool gameBoard::findMatch(int& countPoint)
                 return true;
     return false;
 
+}
+
+void gameBoard::explodeTile(int x, int y, int &countPoint)
+{
+    Mix_PlayChannel(1, eatableSound, 0);
+    for(int i = max(0,x - 1); i <= x+1; i++)
+        for(int j = max(0,y - 1); j <= y+1; j++)
+        {
+            tileBoard[i][j].type = tileStatus::Empty;
+            tileBoard[i][j].renderEmpty();
+        }
+    countPoint += 900;
+    string point = to_string(countPoint);
+    const char* pointt = point.c_str();
+    SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
+    SDL_RenderFillRect(renderer, &YourScore);
+    loadFont(pointt, renderer, YourScore);
 }
 
 bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
@@ -166,7 +180,19 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
                             tileBoard[i][j].swapTile(tileBoard[tempR][tempC]);
                             tileBoard[i][j].render();
                             tileBoard[tempR][tempC].render();
-                            SDL_Delay(150);
+                            if(tileBoard[i][j].tile_status == tileStatus::Bomb)
+                            {
+                                explodeTile(i, j, hiddenPoint);
+                                countSelect = 0;
+                                break;
+                            }
+                            else if (tileBoard[tempR][tempC].tile_status == tileStatus::Bomb)
+                            {
+                                explodeTile(tempR, tempC, hiddenPoint);
+                                countSelect = 0;
+                                break;
+                            }
+                            SDL_Delay(100);
                             if(!findMatch(hiddenPoint))
                             {
                                 swap(tileBoard[i][j].type, tileBoard[tempR][tempC].type);
@@ -230,7 +256,7 @@ void gameBoard::dropTile(int& Point)
         {
             if(tileBoard[i][j].tile_status == tileStatus::Empty)
             {
-                SDL_Delay(100);
+                SDL_Delay(50);
                 tileBoard[i][j].type = 1 + rand() % (numOfTile-1);
                 tileBoard[i][j].render();
             }

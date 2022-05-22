@@ -28,6 +28,7 @@ public:
     void renderBoard();
     void fillBoard();
     bool findMatch(int& countPoint);
+    void explodeTile(int x, int y, int& Point);
     bool selectTile(int xmouse, int ymouse, int &Move);
     bool checkPossibleMove();
     void dropTile(int& Point);

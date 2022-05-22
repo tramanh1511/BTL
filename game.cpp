@@ -19,7 +19,7 @@ void Game::gameInitialize()
 {
     if (!loadMusic()) cerr << "Failed to load music!\n";
     Mix_VolumeChunk(eatableSound, 15);
-    Mix_VolumeChunk(selectedSound, 20);
+    Mix_VolumeChunk(selectedSound, 15);
     Mix_VolumeMusic(80);
     SDL_Texture* image = loadTexture("image/background.png", renderer);
     SDL_RenderCopy(renderer, image, NULL, NULL);
@@ -166,8 +166,7 @@ Game::gameResult(int res)
 
 bool Game::gamePlayAgain()
 {
-    bool isRunning = true;
-    while (isRunning)
+    while (true)
     {
         if (SDL_PollEvent(&e) == 0) continue;
         if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
@@ -176,18 +175,10 @@ bool Game::gamePlayAgain()
             {
                 Mix_PlayChannel(-1, selectedSound, 0);
                 if(e.button.y <= 400 && e.button.y >= 320)
-                {
-                    isRunning = false;
                     return 1;
-
-                }
                 else if(e.button.y <= 500 && e.button.y >= 395)
-                {
-                    isRunning = false;
                     return 0;
-                }
             }
-
         }
     }
 }
