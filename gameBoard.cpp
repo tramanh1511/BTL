@@ -134,13 +134,20 @@ bool gameBoard::findMatch(int& countPoint)
 void gameBoard::explodeTile(int x, int y, int &countPoint)
 {
     Mix_PlayChannel(1, eatableSound, 0);
-    for(int i = max(0,x - 1); i <= x+1; i++)
-        for(int j = max(0,y - 1); j <= y+1; j++)
-        {
-            tileBoard[i][j].type = tileStatus::Empty;
-            tileBoard[i][j].renderEmpty();
-        }
-    countPoint += 900;
+    for(int i = 0; i < boardRow; i++)
+    {
+        SDL_Delay(20);
+        tileBoard[i][y].type = tileStatus::Empty;
+        tileBoard[i][y].renderEmpty();
+    }
+    Mix_PlayChannel(1, eatableSound, 0);
+    for(int j = 0; j < boardCol; j++)
+    {
+        SDL_Delay(20);
+        tileBoard[x][j].type = tileStatus::Empty;
+        tileBoard[x][j].renderEmpty();
+    }
+    countPoint += (boardCol + boardRow)*100;
     string point = to_string(countPoint);
     const char* pointt = point.c_str();
     SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
