@@ -31,6 +31,10 @@ void Tile::render()
         tile_status = tileStatus::Orange;
         image = loadTexture("image/orange.png", renderer);
         break;
+    case 6:
+        tile_status = tileStatus::Purple;
+        image = loadTexture("image/purple.png", renderer);
+        break;
     default:
         break;
     }
@@ -48,6 +52,30 @@ void Tile::renderSelected()
 void Tile::renderEmpty()
 {
     SDL_Texture* image = loadTexture("image/empty.png", renderer);
+    SDL_RenderCopy(renderer, image, NULL, &tileRect);
+    SDL_RenderPresent(renderer);
+}
+
+void Tile::renderDouble()
+{
+    SDL_Texture* image = NULL;
+    switch (status)
+    {
+    case 1:
+        tile_double = tileDouble::Single;
+        break;
+    case 2:
+        tile_double = tileDouble::Double;
+        image = loadTexture("image/ice.png", renderer);
+        break;
+    case 3:
+        tile_double = tileDouble::Bomb;
+        image = loadTexture("image/Bomb.png", renderer);
+        break;
+    default:
+        tile_double = tileDouble::Single;
+        break;
+    }
     SDL_RenderCopy(renderer, image, NULL, &tileRect);
     SDL_RenderPresent(renderer);
 }

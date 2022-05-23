@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 enum tileStatus
 {
     Empty,
@@ -16,6 +15,13 @@ enum tileStatus
     Orange,
     Red,
     Yellow,
+    Purple,
+};
+
+enum tileDouble
+{
+    Double,
+    Single,
     Bomb
 };
 
@@ -25,16 +31,18 @@ private:
     int x = 0, y = 0;
     int w = 63, h = 63;
 public:
-    int type = 0;
+    int type = 0, status = 0;
     SDL_Renderer* renderer = NULL;
     SDL_Texture* texture = NULL;
     SDL_Rect tileRect = {x, y, w, h};
     tileStatus tile_status = tileStatus::Empty;
+    tileDouble tile_double = tileDouble::Single;
     Tile() {};
     ~Tile() {};
     void render();
     void renderSelected();
     void renderEmpty();
+    void renderDouble();
     void swapTile(Tile otherTile);
 };
 

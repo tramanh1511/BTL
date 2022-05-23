@@ -77,16 +77,19 @@ void Game::gameLevel()
                 Mix_PlayChannel(-1, selectedSound, 0);
                 if(e.button.y <= 400 && e.button.y >= 350)
                 {
-                    Move = 20;
+                    Level = 1;
+                    Move = 25;
                     isRunning = false;
                 }
                 else if(e.button.y <= 475 && e.button.y >= 420)
                 {
-                    Move = 15;
+                    Level = 2;
+                    Move = 20;
                     isRunning = false;
                 }
                 else if(e.button.y <= 560 && e.button.y >= 507)
                 {
+                    Level = 3;
                     Move = 10;
                     isRunning = false;
                 }
@@ -108,7 +111,7 @@ int Game::gamePlay()
     string moveString = to_string(Move);
     const char* Movee = moveString.c_str();
     loadFont(Movee, renderer, MoveRect);
-    game_board.fillBoard();
+    game_board.fillBoard(Level);
     bool isRunning = false;
     while (!isRunning)
     {
@@ -134,7 +137,7 @@ int Game::gamePlay()
                 string tempMove = to_string(yourMove);
                 const char* playerMove = tempMove.c_str();
                 loadFont(playerMove, renderer, MoveRect);
-                game_board.dropTile(Point);
+                game_board.dropTile(Point, Level);
             }
             if(Point >= targetPoint)
                 return gameResult(1);

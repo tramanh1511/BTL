@@ -13,7 +13,6 @@ const int boardRow = 9;
 const int boardCol = 9;
 const int numOfTile = 6;
 
-
 class gameBoard
 {
 private:
@@ -26,12 +25,12 @@ public:
     ~gameBoard() {};
 
     void renderBoard();
-    void fillBoard();
+    void fillBoard(int Level);
     bool findMatch(int& countPoint);
     void explodeTile(int x, int y, int& Point);
     bool selectTile(int xmouse, int ymouse, int &Move);
     bool checkPossibleMove();
-    void dropTile(int& Point);
+    void dropTile(int& Point, int Level);
     void mixTile();
 };
 

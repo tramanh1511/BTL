@@ -5,6 +5,7 @@
 #include "SDL_utils.h"
 #include "gameBoard.h"
 
+
 using namespace std;
 
 SDL_Rect YourScore = {45, 310, 120, 50};
@@ -20,8 +21,9 @@ void gameBoard::renderBoard()
 
 }
 
-void gameBoard::fillBoard()
+void gameBoard::fillBoard(int Level)
 {
+    srand(int(time(NULL)));
     int numOfBomb = rand() % 3;
     for(int i = 0; i < boardRow; i++)
     {
@@ -29,9 +31,7 @@ void gameBoard::fillBoard()
         {
             j = max(0,j);
             int type = 1 + rand() % numOfTile;
-            if(numOfBomb == 0) type = 1 + rand() % (numOfTile-1);
             tileBoard[i][j].type = type;
-            if(type == 6) numOfBomb --;
             tileBoard[i][j].tileRect.x = 220 + i*63;
             tileBoard[i][j].tileRect.y =  20 + j*63;
             if (j >= 2 && (tileBoard[i][j].type == tileBoard[i][j-1].type)
@@ -46,17 +46,38 @@ void gameBoard::fillBoard()
                 j--;
                 continue;
             }
+            tileBoard[i][j].renderer = renderer;
+            if(Level >= 1)
+            {
+                tileBoard[i][j].status = 1;
+                tileBoard[i][j].renderEmpty();
+                tileBoard[i][j].renderDouble();
+                tileBoard[i][j].render();
+            }
+            if(Level >= 2)
+            {
+                int temp1 = 1 + rand() % 10;
+                if(temp1 == 3)
+                {
+                    tileBoard[i][j].status = 2;
+                    tileBoard[i][j].renderEmpty();
+                    tileBoard[i][j].renderDouble();
+                    tileBoard[i][j].render();
+                }
+            }
+            if(Level >= 3)
+            {
+                int temp2 = 1 + rand() % 50;
+                if(temp2 == 13)
+                {
+                    tileBoard[i][j].status = 3;
+                    tileBoard[i][j].renderEmpty();
+                    tileBoard[i][j].renderDouble();
+                }
+            }
             j++;
         }
     }
-
-    for(int i = 0; i < boardRow; i++)
-        for(int j = 0; j < boardCol; j++)
-        {
-            tileBoard[i][j].renderer = renderer;
-            tileBoard[i][j].renderEmpty();
-            tileBoard[i][j].render();
-        }
 }
 
 bool gameBoard::findMatch(int& countPoint)
@@ -76,8 +97,16 @@ bool gameBoard::findMatch(int& countPoint)
                 Mix_PlayChannel(1, eatableSound, 0);
                 for (int temp = j; temp < k; temp++)
                 {
+                    SDL_Delay(20);
+                    if(tileBoard[i][temp].tile_double == tileDouble::Double)
+                    {
+                        tileBoard[temp][j].tile_double = tileDouble::Single;
+                        tileBoard[i][temp].renderEmpty();
+                        SDL_Delay(30);
+                        tileBoard[i][temp].render();
+                        continue;
+                    }
                     tileBoard[i][temp].tile_status = tileStatus::Empty;
-                    SDL_Delay(30);
                     tileBoard[i][temp].renderEmpty();
                 }
                 countPoint += (k - j) * 100;
@@ -86,8 +115,6 @@ bool gameBoard::findMatch(int& countPoint)
                 SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
                 SDL_RenderFillRect(renderer, &YourScore);
                 loadFont(pointt, renderer, YourScore);
-
-                //  SDL_RenderPresent(renderer);
             }
             j = k;
         }
@@ -107,8 +134,16 @@ bool gameBoard::findMatch(int& countPoint)
                 Mix_PlayChannel(1, eatableSound, 0);
                 for (int temp = i; temp < k; temp++)
                 {
+                    SDL_Delay(20);
+                    if(tileBoard[temp][j].tile_double == tileDouble::Double)
+                    {
+                        tileBoard[temp][j].tile_double = tileDouble::Single;
+                        tileBoard[temp][j].renderEmpty();
+                        SDL_Delay(30);
+                        tileBoard[temp][j].render();
+                        continue;
+                    }
                     tileBoard[temp][j].tile_status = tileStatus::Empty;
-                    SDL_Delay(30);
                     tileBoard[temp][j].renderEmpty();
                 }
                 countPoint += (k - i) * 100;
@@ -117,8 +152,6 @@ bool gameBoard::findMatch(int& countPoint)
                 SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
                 SDL_RenderFillRect(renderer, &YourScore);
                 loadFont(pointt, renderer, YourScore);
-
-                //  SDL_RenderPresent(renderer);
             }
             i = k;
         }
@@ -136,15 +169,17 @@ void gameBoard::explodeTile(int x, int y, int &countPoint)
     Mix_PlayChannel(1, eatableSound, 0);
     for(int i = 0; i < boardRow; i++)
     {
-        SDL_Delay(20);
+        SDL_Delay(30);
         tileBoard[i][y].type = tileStatus::Empty;
+        tileBoard[i][y].tile_double = tileDouble::Single;
         tileBoard[i][y].renderEmpty();
     }
     Mix_PlayChannel(1, eatableSound, 0);
     for(int j = 0; j < boardCol; j++)
     {
-        SDL_Delay(20);
+        SDL_Delay(30);
         tileBoard[x][j].type = tileStatus::Empty;
+        tileBoard[x][j].tile_double = tileDouble::Single;
         tileBoard[x][j].renderEmpty();
     }
     countPoint += (boardCol + boardRow)*100;
@@ -183,29 +218,44 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
                         if (((i == tempR - 1 && j == tempC) || (i == tempR + 1 && j == tempC) ||
                                 (i == tempR && j == tempC - 1) || ((i == tempR && j == tempC + 1))))
                         {
+                            if(tileBoard[tempR][tempC].tile_double == tileDouble::Double
+                                    || tileBoard[i][j].tile_double == tileDouble::Double) continue;
+
                             swap(tileBoard[i][j].type, tileBoard[tempR][tempC].type);
                             tileBoard[i][j].swapTile(tileBoard[tempR][tempC]);
-                            tileBoard[i][j].render();
+                            if(tileBoard[i][j].status != 1)
+                            {
+                            tileBoard[i][j].renderDouble();
+                            tileBoard[tempR][tempC].renderDouble();
+                            }
+                            if(tileBoard[i][j].status != 3)
+                            {
+                                tileBoard[i][j].render();
                             tileBoard[tempR][tempC].render();
-                            if(tileBoard[i][j].tile_status == tileStatus::Bomb)
+                            }
+                            if(tileBoard[i][j].tile_double == tileDouble::Bomb)
                             {
                                 explodeTile(i, j, hiddenPoint);
                                 countSelect = 0;
                                 break;
                             }
-                            else if (tileBoard[tempR][tempC].tile_status == tileStatus::Bomb)
+                            else if (tileBoard[tempR][tempC].tile_double == tileDouble::Bomb)
                             {
                                 explodeTile(tempR, tempC, hiddenPoint);
                                 countSelect = 0;
                                 break;
                             }
-                            SDL_Delay(100);
+                            SDL_Delay(20);
                             if(!findMatch(hiddenPoint))
                             {
                                 swap(tileBoard[i][j].type, tileBoard[tempR][tempC].type);
                                 if (!Mix_Paused(-1)) Mix_PlayChannel(1, reverseSound, 0);
                                 tileBoard[tempR][tempC].swapTile(tileBoard[i][j]);
-                                SDL_Delay(100);
+                                SDL_Delay(20);
+                                tileBoard[i][j].renderEmpty();
+                                tileBoard[tempR][tempC].renderEmpty();
+                                tileBoard[i][j].renderDouble();
+                                tileBoard[tempR][tempC].renderDouble();
                                 tileBoard[tempR][tempC].render();
                                 tileBoard[i][j].render();
                             }
@@ -213,9 +263,11 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
                         else
                         {
                             tileBoard[i][j].renderEmpty();
-                            tileBoard[i][j].render();
                             tileBoard[tempR][tempC].renderEmpty();
+                            tileBoard[i][j].renderDouble();
+                            tileBoard[tempR][tempC].renderDouble();
                             tileBoard[tempR][tempC].render();
+                            tileBoard[i][j].render();
                         }
                         countSelect = 0;
                     }
@@ -224,7 +276,8 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
                 else if (tileBoard[i][j].tile_status == tileStatus::Selected)
                 {
                     tileBoard[i][j].renderEmpty();
-                    tileBoard[i][j].render();
+                    if(tileBoard[i][j].status != 1) tileBoard[i][j].renderDouble();
+                    if(tileBoard[i][j].status != 3) tileBoard[i][j].render();
                     countSelect--;
                 }
             }
@@ -237,18 +290,23 @@ bool gameBoard::checkPossibleMove()
     gameBoard tempBoard;
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
+        {
             tempBoard.tileBoard[i][j].type = tileBoard[i][j].type;
+            tempBoard.tileBoard[i][j].status = tileBoard[i][j].status;
+        }
+
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol - 1; j++)
         {
+            if(tempBoard.tileBoard[i][j].status == 2) continue;
             swap(tempBoard.tileBoard[i][j].type, tempBoard.tileBoard[i][j+1].type);
-            if(tempBoard.findMatch(hiddenPoint))
-                return true;
+            if(tempBoard.findMatch(hiddenPoint)) return true;
             swap(tempBoard.tileBoard[i][j].type, tempBoard.tileBoard[i][j+1].type);
         }
     for(int i = 0; i < boardCol - 1; i++)
         for(int j = 0; j < boardRow; j++)
         {
+            if(tempBoard.tileBoard[i][j].status == 2) continue;
             swap(tempBoard.tileBoard[i][j].type, tempBoard.tileBoard[i+1][j].type);
             if(tempBoard.findMatch(hiddenPoint)) return true;
             swap(tempBoard.tileBoard[i][j].type, tempBoard.tileBoard[i+1][j].type);
@@ -256,7 +314,7 @@ bool gameBoard::checkPossibleMove()
     return false;
 }
 
-void gameBoard::dropTile(int& Point)
+void gameBoard::dropTile(int& Point, int Level)
 {
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
@@ -264,9 +322,38 @@ void gameBoard::dropTile(int& Point)
             if(tileBoard[i][j].tile_status == tileStatus::Empty)
             {
                 SDL_Delay(50);
-                tileBoard[i][j].type = 1 + rand() % (numOfTile-1);
-                tileBoard[i][j].render();
+                tileBoard[i][j].type = 1 + rand() % numOfTile;
+                int temp1, temp2;
+                if(Level >= 1)
+                {
+                    tileBoard[i][j].status = 1;
+                    tileBoard[i][j].renderEmpty();
+                    tileBoard[i][j].renderDouble();
+                    tileBoard[i][j].render();
+                }
+                if(Level >= 2)
+                {
+                    temp1 = 1 + rand() % 20;
+                    if(temp1 == 7)
+                    {
+                        tileBoard[i][j].status = 2;
+                        tileBoard[i][j].renderEmpty();
+                        tileBoard[i][j].renderDouble();
+                        tileBoard[i][j].render();
+                    }
+                }
+                if(Level >= 3)
+                {
+                    temp2 = 1 + rand() % 50;
+                    if(temp2 == 5)
+                    {
+                        tileBoard[i][j].status = 3;
+                        tileBoard[i][j].renderEmpty();
+                        tileBoard[i][j].renderDouble();
+                    }
+                }
             }
+
         }
 }
 
