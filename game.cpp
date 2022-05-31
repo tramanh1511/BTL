@@ -5,15 +5,18 @@
 #include "SDL_ttf_basic.h"
 #include "gameBoard.h"
 #include "game.h"
+#include "SDL_Time.h"
 
 using namespace std;
 
-SDL_Rect TargetScore = {50, 125, 120, 50};
+SDL_Rect TargetScore = {45, 130, 120, 50};
 SDL_Rect yourScore = {45, 310, 120, 50};
-SDL_Rect MoveRect = {70, 440, 60, 50};
+SDL_Rect MoveRect = {70, 410, 60, 50};
 SDL_Rect soundRect = {730, 10, 50, 50};
 SDL_Rect playbutton = {280, 400, 180, 60};
 SDL_Rect title = {400, 300, 300, 250};
+SDL_Rect high_score = {45, 50, 120, 50};
+SDL_Rect Time = {115, 200, 30, 40};
 
 void Game::gameInitialize()
 {
@@ -61,6 +64,7 @@ void Game::gameInitialize()
 
 void Game::gameLevel()
 {
+
     bool isRunning = true;
     SDL_Texture* select = loadTexture("image/selectLevel.png", renderer);
     SDL_RenderCopy(renderer, select, NULL, NULL);
@@ -108,16 +112,35 @@ int Game::gamePlay()
     gameBoard game_board(renderer);
     loadFont("00000", renderer, yourScore);
     loadFont("10000", renderer, TargetScore);
+    game_board.loadHighScore();
     string moveString = to_string(Move);
     const char* Movee = moveString.c_str();
     loadFont(Movee, renderer, MoveRect);
     game_board.fillBoard(Level);
+    game_board.loadTime();
+    game_board.CountTime();
+
+
     bool isRunning = false;
     while (!isRunning)
     {
+        game_board.CountTime();
         if (SDL_PollEvent(&e) == 0) continue;
+
         if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
         {
+            if(e.button.x <= 165 && e.button.x >= 40 && e.button.y <= 520 && e.button.y >= 490)
+            {
+
+                Mix_PlayChannel(1, selectedSound, 0);
+                game_board.Pause();
+
+            }
+            else if(e.button.x <= 150 && e.button.x >= 45 && e.button.y <= 570 && e.button.y >= 545)
+            {
+                Mix_PlayChannel(1, selectedSound, 0);
+                return gameResult(2);
+            }
             while(!game_board.checkPossibleMove())
             {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -139,6 +162,8 @@ int Game::gamePlay()
                 loadFont(playerMove, renderer, MoveRect);
                 game_board.dropTile(Point, Level);
             }
+            if(game_board.checkTime())
+                return gameResult(0);
             if(Point >= targetPoint)
                 return gameResult(1);
             else if(yourMove == 0)
@@ -157,13 +182,18 @@ Game::gameResult(int res)
         SDL_RenderPresent(renderer);
         return 1;
     }
-    else
+    else if(res == 0)
     {
         Mix_PlayMusic(gameOverMusic, -1);
         SDL_Texture* image = loadTexture("image/GameOver.png", renderer);
         SDL_RenderCopy(renderer, image, NULL, NULL);
         SDL_RenderPresent(renderer);
         return 0;
+    }
+    else if(res == 2)
+    {
+        return 2;
+
     }
 }
 
@@ -185,4 +215,3 @@ bool Game::gamePlayAgain()
         }
     }
 }
-

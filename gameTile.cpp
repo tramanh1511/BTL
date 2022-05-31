@@ -35,6 +35,10 @@ void Tile::render()
         tile_status = tileStatus::Purple;
         image = loadTexture("image/purple.png", renderer);
         break;
+    case 7:
+        tile_status = tileStatus::Bomb;
+        image = loadTexture("image/bomb.png", renderer);
+        break;
     default:
         break;
     }
@@ -68,12 +72,7 @@ void Tile::renderDouble()
         tile_double = tileDouble::Double;
         image = loadTexture("image/ice.png", renderer);
         break;
-    case 3:
-        tile_double = tileDouble::Bomb;
-        image = loadTexture("image/Bomb.png", renderer);
-        break;
     default:
-        tile_double = tileDouble::Single;
         break;
     }
     SDL_RenderCopy(renderer, image, NULL, &tileRect);

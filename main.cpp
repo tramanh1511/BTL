@@ -23,10 +23,12 @@ int main(int argc, char* argv[])
 
     // Your drawing code here
     SDL_Event e;
-    bool isRunning = false;
-    while(!isRunning)
+    bool isRunning = true;
+    int choice = 0;
+    while(isRunning)
     {
         bool gameOver = false;
+        bool status = true;
         if (SDL_PollEvent(&e) == 0) continue;
         if (e.type == SDL_QUIT) break;
         if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) break;
@@ -35,11 +37,28 @@ int main(int argc, char* argv[])
         game.gameLevel();
         while(!gameOver)
         {
+//            cerr << game.highScore << "\n";
             int res = game.gamePlay();
-            if(res == 0 || res == 1) gameOver = true;
+            if(res == 0 || res == 1)
+            {
+                gameOver = true;
+                isRunning = false;
+                choice = 0;
+            }
+            else
+            {
+                gameOver = true;
+                choice = 1;
+            }
         }
-        int status = game.gamePlayAgain();
-        if(!status) isRunning = true;
+        if(choice)
+        {
+            isRunning = true;
+            continue;
+        }
+        status = game.gamePlayAgain();
+        if(!status) isRunning = false;
+        else isRunning = true;
     }
     closeMusic();
     waitUntilKeyPressed();

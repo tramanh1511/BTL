@@ -5,16 +5,26 @@
 #include "SDL_utils.h"
 #include "gameBoard.h"
 
-
 using namespace std;
 
 SDL_Rect YourScore = {45, 310, 120, 50};
+SDL_Rect HighScore = {45, 50, 120, 50};
+SDL_Rect Time_ = {115, 200, 30, 40};
+
+
+LTimer timer;
+stringstream timeText;
 
 void gameBoard::renderBoard()
 {
+
+    CountTime();
+    checkTime();
+
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
         {
+
             tileBoard[i][j].renderer = renderer;
             tileBoard[i][j].render();
         }
@@ -23,7 +33,6 @@ void gameBoard::renderBoard()
 
 void gameBoard::fillBoard(int Level)
 {
-    srand(int(time(NULL)));
     int numOfBomb = rand() % 3;
     for(int i = 0; i < boardRow; i++)
     {
@@ -67,26 +76,37 @@ void gameBoard::fillBoard(int Level)
             }
             if(Level >= 3)
             {
-                int temp2 = 1 + rand() % 50;
-                if(temp2 == 13)
+                int temp2 = 1 + rand() % 100;
+                if(temp2 % 97 == 0)
                 {
-                    tileBoard[i][j].status = 3;
+                    tileBoard[i][j].type = 7;
+                    tileBoard[i][j].status = 1;
                     tileBoard[i][j].renderEmpty();
+                    tileBoard[i][j].render();
                     tileBoard[i][j].renderDouble();
                 }
             }
             j++;
         }
     }
+
+    CountTime();
+
+
 }
 
 bool gameBoard::findMatch(int& countPoint)
 {
+
+    CountTime();
+    checkTime();
+
     for (int i = 0; i < boardRow; i++)
     {
         int k = 1;
         for (int j = 0; j < boardCol - 2;)
         {
+
             if ( k < boardCol && tileBoard[i][j].type == tileBoard[i][k].type)
             {
                 k++;
@@ -97,15 +117,7 @@ bool gameBoard::findMatch(int& countPoint)
                 Mix_PlayChannel(1, eatableSound, 0);
                 for (int temp = j; temp < k; temp++)
                 {
-                    SDL_Delay(20);
-                    if(tileBoard[i][temp].tile_double == tileDouble::Double)
-                    {
-                        tileBoard[temp][j].tile_double = tileDouble::Single;
-                        tileBoard[i][temp].renderEmpty();
-                        SDL_Delay(30);
-                        tileBoard[i][temp].render();
-                        continue;
-                    }
+                    SDL_Delay(30);
                     tileBoard[i][temp].tile_status = tileStatus::Empty;
                     tileBoard[i][temp].renderEmpty();
                 }
@@ -115,6 +127,13 @@ bool gameBoard::findMatch(int& countPoint)
                 SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
                 SDL_RenderFillRect(renderer, &YourScore);
                 loadFont(pointt, renderer, YourScore);
+
+                highScore = max(highScore, countPoint);
+                string high = to_string(highScore);
+                const char* highscore = high.c_str();
+                SDL_SetRenderDrawColor(renderer, 255, 200, 220, 0);
+                SDL_RenderFillRect(renderer, &HighScore);
+                loadFont(highscore, renderer, HighScore);
             }
             j = k;
         }
@@ -134,15 +153,7 @@ bool gameBoard::findMatch(int& countPoint)
                 Mix_PlayChannel(1, eatableSound, 0);
                 for (int temp = i; temp < k; temp++)
                 {
-                    SDL_Delay(20);
-                    if(tileBoard[temp][j].tile_double == tileDouble::Double)
-                    {
-                        tileBoard[temp][j].tile_double = tileDouble::Single;
-                        tileBoard[temp][j].renderEmpty();
-                        SDL_Delay(30);
-                        tileBoard[temp][j].render();
-                        continue;
-                    }
+                    SDL_Delay(30);
                     tileBoard[temp][j].tile_status = tileStatus::Empty;
                     tileBoard[temp][j].renderEmpty();
                 }
@@ -152,6 +163,13 @@ bool gameBoard::findMatch(int& countPoint)
                 SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
                 SDL_RenderFillRect(renderer, &YourScore);
                 loadFont(pointt, renderer, YourScore);
+
+                highScore = max(highScore, countPoint);
+                string high = to_string(highScore);
+                const char* highscore = high.c_str();
+                SDL_SetRenderDrawColor(renderer, 255, 200, 220, 0);
+                SDL_RenderFillRect(renderer, &HighScore);
+                loadFont(highscore, renderer, HighScore);
             }
             i = k;
         }
@@ -166,6 +184,10 @@ bool gameBoard::findMatch(int& countPoint)
 
 void gameBoard::explodeTile(int x, int y, int &countPoint)
 {
+
+    CountTime();
+    checkTime();
+
     Mix_PlayChannel(1, eatableSound, 0);
     for(int i = 0; i < boardRow; i++)
     {
@@ -188,10 +210,21 @@ void gameBoard::explodeTile(int x, int y, int &countPoint)
     SDL_SetRenderDrawColor(renderer, 255, 170, 200, 0);
     SDL_RenderFillRect(renderer, &YourScore);
     loadFont(pointt, renderer, YourScore);
+
+    highScore = max(highScore, countPoint);
+    string high = to_string(highScore);
+    const char* highscore = high.c_str();
+    SDL_SetRenderDrawColor(renderer, 255, 200, 220, 0);
+    SDL_RenderFillRect(renderer, &HighScore);
+    loadFont(highscore, renderer, HighScore);
 }
 
 bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
 {
+
+    CountTime();
+    checkTime();
+
     if (!Mix_Paused(-1)) Mix_PlayChannel(-1, selectedSound, 0);
     static int countSelect = 0;
     static int tempR = 0, tempC = 0;
@@ -225,33 +258,33 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
                             tileBoard[i][j].swapTile(tileBoard[tempR][tempC]);
                             if(tileBoard[i][j].status != 1)
                             {
-                            tileBoard[i][j].renderDouble();
-                            tileBoard[tempR][tempC].renderDouble();
+                                tileBoard[i][j].renderDouble();
+                                tileBoard[tempR][tempC].renderDouble();
                             }
                             if(tileBoard[i][j].status != 3)
                             {
                                 tileBoard[i][j].render();
-                            tileBoard[tempR][tempC].render();
+                                tileBoard[tempR][tempC].render();
                             }
-                            if(tileBoard[i][j].tile_double == tileDouble::Bomb)
+                            if(tileBoard[i][j].tile_status == tileStatus::Bomb)
                             {
                                 explodeTile(i, j, hiddenPoint);
                                 countSelect = 0;
                                 break;
                             }
-                            else if (tileBoard[tempR][tempC].tile_double == tileDouble::Bomb)
+                            else if (tileBoard[tempR][tempC].tile_status == tileStatus::Bomb)
                             {
                                 explodeTile(tempR, tempC, hiddenPoint);
                                 countSelect = 0;
                                 break;
                             }
-                            SDL_Delay(20);
+                            SDL_Delay(100);
                             if(!findMatch(hiddenPoint))
                             {
                                 swap(tileBoard[i][j].type, tileBoard[tempR][tempC].type);
                                 if (!Mix_Paused(-1)) Mix_PlayChannel(1, reverseSound, 0);
                                 tileBoard[tempR][tempC].swapTile(tileBoard[i][j]);
-                                SDL_Delay(20);
+                                SDL_Delay(30);
                                 tileBoard[i][j].renderEmpty();
                                 tileBoard[tempR][tempC].renderEmpty();
                                 tileBoard[i][j].renderDouble();
@@ -287,6 +320,10 @@ bool gameBoard::selectTile(int xmouse, int ymouse, int& Move)
 
 bool gameBoard::checkPossibleMove()
 {
+
+    CountTime();
+    checkTime();
+
     gameBoard tempBoard;
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
@@ -294,7 +331,6 @@ bool gameBoard::checkPossibleMove()
             tempBoard.tileBoard[i][j].type = tileBoard[i][j].type;
             tempBoard.tileBoard[i][j].status = tileBoard[i][j].status;
         }
-
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol - 1; j++)
         {
@@ -316,6 +352,10 @@ bool gameBoard::checkPossibleMove()
 
 void gameBoard::dropTile(int& Point, int Level)
 {
+
+    CountTime();
+    checkTime();
+
     for(int i = 0; i < boardRow; i++)
         for(int j = 0; j < boardCol; j++)
         {
@@ -334,22 +374,12 @@ void gameBoard::dropTile(int& Point, int Level)
                 if(Level >= 2)
                 {
                     temp1 = 1 + rand() % 20;
-                    if(temp1 == 7)
+                    if(temp1 % 7 == 0)
                     {
                         tileBoard[i][j].status = 2;
                         tileBoard[i][j].renderEmpty();
                         tileBoard[i][j].renderDouble();
                         tileBoard[i][j].render();
-                    }
-                }
-                if(Level >= 3)
-                {
-                    temp2 = 1 + rand() % 50;
-                    if(temp2 == 5)
-                    {
-                        tileBoard[i][j].status = 3;
-                        tileBoard[i][j].renderEmpty();
-                        tileBoard[i][j].renderDouble();
                     }
                 }
             }
@@ -359,6 +389,10 @@ void gameBoard::dropTile(int& Point, int Level)
 
 void gameBoard::mixTile()
 {
+
+    CountTime();
+    checkTime();
+
     int tempBoard[boardRow][boardCol];
     bool checkFill[boardRow][boardCol] = {0};
     for(int i = 0; i < boardRow; i++)
@@ -376,5 +410,33 @@ void gameBoard::mixTile()
     while(!checkPossibleMove()) mixTile();
 }
 
+void gameBoard::Pause()
+{
+    if( timer.isPaused())timer.unpause();
+    else timer.pause();
+}
 
+void gameBoard::CountTime()
+{
+    timeText.str( "" );
+    timeText <<(100 - (timer.getTicks() / 1000 )) ;
+    SDL_SetRenderDrawColor(renderer, 255, 200, 201, 0);
+    SDL_RenderFillRect(renderer, &Time_);
+    loadFont(timeText.str().c_str(), renderer, Time_);
+}
 
+bool gameBoard::checkTime()
+{
+    if( (100 - (timer.getTicks() / 1000 )) == 0) return 1;
+    return 0;
+}
+
+void gameBoard::loadHighScore()
+{
+    string high = to_string(highScore);
+    const char* highscore = high.c_str();
+    SDL_SetRenderDrawColor(renderer, 255, 200, 220, 0);
+    SDL_RenderFillRect(renderer, &HighScore);
+    if(highScore == 0) loadFont("00000", renderer, HighScore);
+    else loadFont(highscore, renderer, HighScore);
+}
